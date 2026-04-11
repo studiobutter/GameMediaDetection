@@ -26,7 +26,7 @@ namespace GameMediaDetection
                 "Genshin Impact Cloud Game"
             }},
             { "Honkai: Star Rail", new List<string> {
-                "Star Rail"
+                "StarRail"
             }},
             { "Zenless Zone Zero", new List<string> {
                 "ZenlessZoneZero",
