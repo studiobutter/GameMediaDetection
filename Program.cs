@@ -14,24 +14,26 @@ namespace GameMediaDetection
     internal class Program
     {
         static HashSet<string> previousProcesses = new(StringComparer.OrdinalIgnoreCase);
+        static HashSet<string> previousGames = new(StringComparer.OrdinalIgnoreCase);
         static Dictionary<string, DateTime> lastNotified = new();
 
         static Dictionary<string, List<string>> games = new()
         {
             { "Genshin Impact", new List<string> {
-                "GenshinImpact.exe",
-                "YuanShen.exe",
-                "Genshin Impact Cloud.exe"
+                "GenshinImpact",
+                "YuanShen",
+                "Genshin Impact Cloud",
+                "Genshin Impact Cloud Game"
             }},
             { "Honkai: Star Rail", new List<string> {
-                "Star Rail.exe"
+                "Star Rail"
             }},
             { "Zenless Zone Zero", new List<string> {
-                "ZenlessZoneZero.exe",
-                "Zenless Zone Zero Cloud.exe"
+                "ZenlessZoneZero",
+                "Zenless Zone Zero Cloud"
             }},
             { "Honkai Impact 3rd", new List<string> {
-                "BH3.exe"
+                "BH3"
             }}
         };
 
@@ -70,8 +72,26 @@ namespace GameMediaDetection
             while (true)
             {
                 var currentProcesses = GetRunningProcesses();
-                var newProcesses = currentProcesses.Except(previousProcesses);
+                var currentGames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+                // Determine which games are currently running
+                foreach (var game in games)
+                {
+                    if (game.Value.Any(exe => currentProcesses.Contains(exe)))
+                    {
+                        currentGames.Add(game.Key);
+                    }
+                }
+
+                // Clear notification data for games that have stopped
+                var stoppedGames = previousGames.Except(currentGames);
+                foreach (var game in stoppedGames)
+                {
+                    lastNotified.Remove(game);
+                }
+
+                // Check for new game launches
+                var newProcesses = currentProcesses.Except(previousProcesses);
                 foreach (var proc in newProcesses)
                 {
                     foreach (var game in games)
@@ -88,6 +108,7 @@ namespace GameMediaDetection
                 }
 
                 previousProcesses = currentProcesses;
+                previousGames = currentGames;
                 await Task.Delay(2000);
             }
         }
@@ -98,15 +119,7 @@ namespace GameMediaDetection
 
             foreach (var p in Process.GetProcesses())
             {
-                try
-                {
-                    string name = Path.GetFileName(p.MainModule.FileName);
-                    set.Add(name);
-                }
-                catch
-                {
-                    set.Add(p.ProcessName + ".exe");
-                }
+                set.Add(p.ProcessName);
             }
 
             return set;
