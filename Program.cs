@@ -34,6 +34,9 @@ namespace GameMediaDetection
             }},
             { "Honkai Impact 3rd", new List<string> {
                 "BH3"
+            }},
+            { "Sky: Children of the Light", new List<string> {
+                "Sky"
             }}
         };
 
